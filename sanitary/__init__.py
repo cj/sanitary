@@ -44,7 +44,7 @@ class Sanitizer:
         self.replacement: ReplacementType = replacement
         self.keys: Set = set(map(str.lower, keys))
         self.patterns: Set[Pattern[AnyStr]] = set(map(re.compile, patterns))  # type: ignore
-        self.message: str = message
+        self.message: ReplacementType = message
 
     @singledispatchmethod
     def sanitize(self, data: Any) -> Any:
@@ -82,7 +82,7 @@ class Sanitizer:
         except json.JSONDecodeError:
             for sensitive_pattern in self.patterns:
                 if sensitive_pattern.search(data):  # type: ignore
-                    return self.message
+                    return _replace(self.message, self.replacement)
             return data
         else:
             return self.sanitize(data)
